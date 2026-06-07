@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DesiDiabetiCoach — Claude Code Setup Guide</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --card: #1c2230;
+  --border: #30363d;
+  --accent: #e8732a;
+  --accent2: #2d7a4f;
+  --blue: #4493f8;
+  --purple: #a371f7;
+  --yellow: #e3b341;
+  --red: #f85149;
+  --green: #3fb950;
+  --text: #e6edf3;
+  --muted: #8b949e;
+  --code-bg: #0d1117;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:'Plus Jakarta Sans',sans-serif; line-height:1.6; }
+
+/* ── TOP HEADER ── */
+.header {
+  background: linear-gradient(135deg, #1a120a, #0d1a12);
+  border-bottom: 1px solid var(--border);
+  padding: 48px 64px 44px;
+  position: relative; overflow: hidden;
+}
+.header::before {
+  content:'';
+  position:absolute; inset:0;
+  background: radial-gradient(ellipse 60% 80% at 80% 30%, rgba(232,115,42,0.1) 0%, transparent 60%);
+}
+.header-label {
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px; letter-spacing:2px; color:var(--accent);
+  margin-bottom:14px; opacity:0.8;
+}
+.header h1 {
+  font-size:42px; font-weight:800; line-height:1.1;
+  color:var(--text); margin-bottom:12px; position:relative; z-index:1;
+}
+.header h1 span { color:var(--accent); }
+.header-sub { font-size:15px; color:var(--muted); max-width:580px; position:relative; z-index:1; }
+.header-badges { display:flex; gap:10px; margin-top:24px; flex-wrap:wrap; position:relative; z-index:1; }
+.hbadge {
+  font-family:'JetBrains Mono',monospace; font-size:11px;
+  padding:4px 12px; border-radius:50px; font-weight:500;
+  border:1px solid;
+}
+.hb-orange { color:var(--accent); border-color:rgba(232,115,42,0.3); background:rgba(232,115,42,0.08); }
+.hb-green  { color:var(--green); border-color:rgba(63,185,80,0.3); background:rgba(63,185,80,0.08); }
+.hb-blue   { color:var(--blue); border-color:rgba(68,147,248,0.3); background:rgba(68,147,248,0.08); }
+.hb-purple { color:var(--purple); border-color:rgba(163,113,247,0.3); background:rgba(163,113,247,0.08); }
+
+/* ── SECTIONS ── */
+.section { padding: 52px 64px; border-bottom: 1px solid var(--border); }
+.section-num {
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px; letter-spacing:3px; color:var(--muted);
+  text-transform:uppercase; margin-bottom:6px;
+}
+.section h2 { font-size:28px; font-weight:800; color:var(--text); margin-bottom:6px; }
+.section .sub { font-size:14px; color:var(--muted); margin-bottom:32px; max-width:600px; }
+
+/* ── STEP CARDS ── */
+.steps { display:flex; flex-direction:column; gap:2px; }
+.step {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:0; display:grid;
+  grid-template-columns: 56px 1fr;
+  overflow:hidden;
+  transition: border-color .2s;
+}
+.step:first-child { border-radius:10px 10px 0 0; }
+.step:last-child { border-radius:0 0 10px 10px; }
+.step:hover { border-color:rgba(232,115,42,0.4); }
+.step-num-col {
+  background:rgba(232,115,42,0.08);
+  display:flex; align-items:flex-start; justify-content:center;
+  padding-top:20px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:20px; font-weight:700; color:var(--accent);
+  border-right:1px solid var(--border);
+}
+.step-body { padding:18px 24px; }
+.step-title { font-size:15px; font-weight:700; color:var(--text); margin-bottom:6px; }
+.step-desc { font-size:13px; color:var(--muted); line-height:1.65; margin-bottom:12px; }
+
+/* ── CODE BLOCKS ── */
+.code-block {
+  background:var(--code-bg); border:1px solid var(--border);
+  border-radius:8px; overflow:hidden; margin-top:10px; font-size:13px;
+}
+.code-header {
+  background:var(--surface); padding:8px 14px;
+  display:flex; align-items:center; gap:8px;
+  border-bottom:1px solid var(--border);
+}
+.code-dots { display:flex; gap:5px; }
+.dot { width:10px;height:10px;border-radius:50%; }
+.dot-r { background:#f85149; }
+.dot-y { background:#e3b341; }
+.dot-g { background:#3fb950; }
+.code-label { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); margin-left:4px; }
+.code-copy {
+  margin-left:auto; font-family:'JetBrains Mono',monospace; font-size:10px;
+  color:var(--muted); cursor:pointer; padding:2px 8px;
+  border:1px solid var(--border); border-radius:4px; background:transparent;
+  transition:all .15s;
+}
+.code-copy:hover { color:var(--text); border-color:var(--muted); }
+pre {
+  padding:16px; overflow-x:auto; line-height:1.6;
+  font-family:'JetBrains Mono',monospace;
+}
+.kw { color:#ff7b72; }
+.str { color:#a5d6ff; }
+.cm { color:#8b949e; font-style:italic; }
+.fn { color:#d2a8ff; }
+.num { color:#f2cc60; }
+.op { color:#79c0ff; }
+.var { color:#ffa657; }
+
+/* ── ENV TABLE ── */
+.env-table { width:100%; border-collapse:collapse; font-size:13px; margin-top:16px; }
+.env-table th {
+  background:var(--surface); padding:10px 14px; text-align:left;
+  font-family:'JetBrains Mono',monospace; font-size:10px;
+  letter-spacing:2px; color:var(--muted); text-transform:uppercase;
+  border:1px solid var(--border);
+}
+.env-table td { padding:10px 14px; border:1px solid var(--border); vertical-align:top; }
+.env-table td:first-child { font-family:'JetBrains Mono',monospace; color:var(--yellow); }
+.env-table td:nth-child(2) { color:var(--muted); font-size:12px; }
+.env-table td:nth-child(3) { color:var(--text); font-size:12px; }
+.req { color:var(--red); font-size:10px; font-weight:700; }
+.opt { color:var(--muted); font-size:10px; }
+
+/* ── ENVIRONMENT BLOCKS ── */
+.env-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:8px; }
+.env-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:10px; padding:20px; position:relative; overflow:hidden;
+}
+.env-card::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:3px;
+}
+.env-dev::before   { background:var(--yellow); }
+.env-stage::before { background:var(--blue); }
+.env-prod::before  { background:var(--green); }
+.env-card-label {
+  font-family:'JetBrains Mono',monospace; font-size:9px;
+  letter-spacing:3px; text-transform:uppercase; margin-bottom:10px;
+}
+.env-dev .env-card-label   { color:var(--yellow); }
+.env-stage .env-card-label { color:var(--blue); }
+.env-prod .env-card-label  { color:var(--green); }
+.env-card h3 { font-size:18px; font-weight:700; color:var(--text); margin-bottom:8px; }
+.env-card ul { list-style:none; display:flex; flex-direction:column; gap:5px; }
+.env-card ul li { font-size:12px; color:var(--muted); display:flex; gap:6px; align-items:flex-start; }
+.env-card ul li::before { content:'›'; color:var(--accent); flex-shrink:0; }
+
+/* ── FILE TREE ── */
+.file-tree {
+  background:var(--code-bg); border:1px solid var(--border); border-radius:8px;
+  padding:20px; font-family:'JetBrains Mono',monospace; font-size:12px;
+  line-height:1.9; margin-top:16px;
+}
+.ft-dir  { color:var(--blue); }
+.ft-file { color:var(--text); }
+.ft-key  { color:var(--accent); font-weight:700; }
+.ft-cm   { color:var(--muted); font-size:11px; }
+.ft-new  { color:var(--green); }
+
+/* ── COMMAND LIST ── */
+.cmd-list { display:flex; flex-direction:column; gap:10px; margin-top:8px; }
+.cmd-item {
+  background:var(--surface); border:1px solid var(--border); border-radius:8px;
+  padding:14px 18px; display:flex; gap:16px; align-items:flex-start;
+}
+.cmd-code {
+  font-family:'JetBrains Mono',monospace; font-size:12px;
+  color:var(--green); background:rgba(63,185,80,0.08);
+  padding:3px 10px; border-radius:4px; white-space:nowrap; flex-shrink:0;
+}
+.cmd-desc { font-size:13px; color:var(--muted); }
+
+/* ── ALERT BOXES ── */
+.alert {
+  padding:14px 18px; border-radius:8px; border-left:3px solid;
+  margin-top:16px; font-size:13px;
+}
+.alert-warn { background:rgba(227,179,65,0.08); border-color:var(--yellow); color:#e3c048; }
+.alert-info { background:rgba(68,147,248,0.08); border-color:var(--blue); color:#79b8ff; }
+.alert-tip  { background:rgba(63,185,80,0.08); border-color:var(--green); color:#56d364; }
+.alert strong { font-weight:700; }
+
+/* ── FOOTER ── */
+footer {
+  background:var(--surface); border-top:1px solid var(--border);
+  padding:24px 64px; display:flex; justify-content:space-between;
+  font-size:12px; color:var(--muted); font-family:'JetBrains Mono',monospace;
+}
+footer span { color:var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-label">// DEVELOPER SETUP GUIDE</div>
+  <h1>DesiDiabeti<span>Coach</span><br>Claude Code Environment</h1>
+  <p class="header-sub">Complete setup for Development → Staging → Production with Claude Code. Windows (PowerShell) primary.</p>
+  <div class="header-badges">
+    <span class="hbadge hb-orange">Claude Code v2.1+</span>
+    <span class="hbadge hb-green">Next.js 14</span>
+    <span class="hbadge hb-blue">Supabase</span>
+    <span class="hbadge hb-purple">React Native / Expo</span>
+  </div>
+</div>
+
+<!-- STEP 1: INSTALL CLAUDE CODE -->
+<div class="section">
+  <div class="section-num">Step 01</div>
+  <h2>Install Claude Code</h2>
+  <p class="sub">Two options: Desktop app (easiest) or CLI via npm. You need a Claude Pro, Max, Team, or Enterprise subscription.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num-col">A</div>
+      <div class="step-body">
+        <div class="step-title">Option A — Claude Desktop (Recommended)</div>
+        <div class="step-desc">Download Claude Desktop from claude.ai/download. Available for Windows (x64 + ARM64). After install, sign in and click the <strong>Code tab</strong> in the top nav.</div>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+            <span class="code-label">URL</span>
+          </div>
+          <pre><span class="str">https://claude.ai/download</span>   <span class="cm">← Download here, sign in with your Anthropic account</span></pre>
+        </div>
+        <div class="alert alert-info" style="margin-top:12px"><strong>Note:</strong> On Windows, Git must be installed for local sessions. Download from git-scm.com with default settings.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num-col">B</div>
+      <div class="step-body">
+        <div class="step-title">Option B — CLI via npm (PowerShell)</div>
+        <div class="step-desc">For terminal-based workflow. Requires Node.js 20+.</div>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+            <span class="code-label">PowerShell — Run as Administrator</span>
+          </div>
+          <pre><span class="cm"># Check Node.js version first (must be 20+)</span>
+node --version
+
+<span class="cm"># Install Claude Code globally</span>
+npm install -g @anthropic-ai/claude-code
+
+<span class="cm"># Authenticate (opens browser)</span>
+claude login
+
+<span class="cm"># Verify installation</span>
+claude --version</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 2: CLONE / SETUP PROJECT -->
+<div class="section">
+  <div class="section-num">Step 02</div>
+  <h2>Set Up the Project</h2>
+  <p class="sub">Get the project files onto your machine and run the automated setup script.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num-col">1</div>
+      <div class="step-body">
+        <div class="step-title">Clone from GitHub (or copy project folder)</div>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+            <span class="code-label">PowerShell</span>
+          </div>
+          <pre><span class="cm"># Navigate to your dev folder</span>
+cd C:\Dev
+
+<span class="cm"># Clone the repo</span>
+git clone https://github.com/casmendora/desidiabeticoach.git
+cd desidiabeticoach
+
+<span class="cm"># OR if you have the folder already, just navigate to it</span>
+cd C:\Dev\desidiabeticoach</pre>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num-col">2</div>
+      <div class="step-body">
+        <div class="step-title">Run the one-command setup script</div>
+        <div class="step-desc">This checks prerequisites, installs dependencies, starts Docker, and runs database migrations automatically.</div>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+            <span class="code-label">PowerShell</span>
+          </div>
+          <pre>node scripts/setup.js</pre>
+        </div>
+        <div class="alert alert-warn"><strong>⚠ After setup:</strong> Open <code>.env.local</code> and fill in your ANTHROPIC_API_KEY and other secrets before starting the dev server. Get your API key at console.anthropic.com.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num-col">3</div>
+      <div class="step-body">
+        <div class="step-title">Open in Claude Code</div>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+            <span class="code-label">Desktop App OR CLI</span>
+          </div>
+          <pre><span class="cm"># Desktop App: Code tab → Select Folder → C:\Dev\desidiabeticoach</span>
+
+<span class="cm"># CLI:</span>
+cd C:\Dev\desidiabeticoach
+claude</pre>
+        </div>
+        <div class="alert alert-tip"><strong>✓ Claude automatically reads CLAUDE.md</strong> at the start of every session — giving it full context about the project, tech stack, database schema, and coding standards. No re-explaining needed.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 3: THREE ENVIRONMENTS -->
+<div class="section">
+  <div class="section-num">Step 03</div>
+  <h2>Three Environments Explained</h2>
+  <p class="sub">Dev → Staging → Production. Each has its own database, secrets, and deploy process.</p>
+
+  <div class="env-grid">
+    <div class="env-card env-dev">
+      <div class="env-card-label">Environment 01</div>
+      <h3>🖥 Development</h3>
+      <ul>
+        <li>Runs entirely on your Windows machine</li>
+        <li>Supabase DB runs in Docker</li>
+        <li>URL: localhost:3000</li>
+        <li>Start: <code>npm run dev:web</code></li>
+        <li>DB UI: localhost:54323</li>
+        <li>Email: localhost:8025 (Mailhog)</li>
+        <li>Branch: any feature branch</li>
+        <li>Secrets: .env.local (never commit)</li>
+      </ul>
+    </div>
+    <div class="env-card env-stage">
+      <div class="env-card-label">Environment 02</div>
+      <h3>🧪 Staging</h3>
+      <ul>
+        <li>Cloud environment for testing</li>
+        <li>Auto-deploys from: develop branch</li>
+        <li>URL: staging.desidiabeticoach.com</li>
+        <li>DB: Supabase cloud (staging project)</li>
+        <li>Deploy: push to develop branch</li>
+        <li>Secrets: Vercel environment variables</li>
+        <li>Use for: QA, demos, client reviews</li>
+        <li>Claude command: /deploy-staging</li>
+      </ul>
+    </div>
+    <div class="env-card env-prod">
+      <div class="env-card-label">Environment 03</div>
+      <h3>🚀 Production</h3>
+      <ul>
+        <li>Live app — real users</li>
+        <li>Deploys from: main branch ONLY</li>
+        <li>URL: www.desidiabeticoach.com</li>
+        <li>DB: Supabase cloud (prod project)</li>
+        <li>Deploy: PR to main + manual approval</li>
+        <li>Secrets: Vercel production env vars</li>
+        <li>NEVER deploy directly from dev</li>
+        <li>Requires GitHub environment approval</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 4: PROJECT FILES -->
+<div class="section">
+  <div class="section-num">Step 04</div>
+  <h2>Project Files Created</h2>
+  <p class="sub">All files are in your desidiabeticoach/ folder. Here's what was created and why it matters.</p>
+
+  <div class="file-tree">
+<span class="ft-dir">desidiabeticoach/</span>
+├── <span class="ft-key">CLAUDE.md</span>              <span class="ft-cm">← Claude reads this FIRST every session. Has full context.</span>
+├── <span class="ft-dir">.claude/</span>
+│   ├── <span class="ft-key">settings.json</span>      <span class="ft-cm">← What Claude Code is allowed/denied to run</span>
+│   └── <span class="ft-dir">commands/</span>
+│       ├── <span class="ft-new">dev-status.md</span>   <span class="ft-cm">← /dev-status  → Check what's running</span>
+│       ├── <span class="ft-new">new-migration.md</span> <span class="ft-cm">← /new-migration → Create DB migration</span>
+│       └── <span class="ft-new">deploy-staging.md</span> <span class="ft-cm">← /deploy-staging → Safe staging deploy</span>
+├── <span class="ft-dir">supabase/</span>
+│   └── <span class="ft-dir">migrations/</span>
+│       └── <span class="ft-new">001_initial_schema.sql</span>  <span class="ft-cm">← Full DB schema (users, foods, logs)</span>
+├── <span class="ft-dir">infrastructure/</span>
+│   └── <span class="ft-dir">dev/</span>
+│       └── <span class="ft-new">docker-compose.yml</span>  <span class="ft-cm">← Local Supabase + Redis + Mailhog</span>
+├── <span class="ft-dir">.github/</span>
+│   └── <span class="ft-dir">workflows/</span>
+│       └── <span class="ft-new">ci-cd.yml</span>           <span class="ft-cm">← GitHub Actions: test → staging → prod</span>
+├── <span class="ft-dir">scripts/</span>
+│   └── <span class="ft-new">setup.js</span>             <span class="ft-cm">← One-command dev environment setup</span>
+├── <span class="ft-new">.env.example</span>           <span class="ft-cm">← Template for .env.local (copy this)</span>
+├── <span class="ft-new">.gitignore</span>             <span class="ft-cm">← Protects secrets from being committed</span>
+└── <span class="ft-new">package.json</span>           <span class="ft-cm">← Monorepo root with all scripts</span>
+  </div>
+
+  <div class="alert alert-tip" style="margin-top:20px">
+    <strong>Next to build (tell Claude Code to do this):</strong> "Set up the Next.js web app in apps/web/ with Tailwind, Supabase auth, and the dashboard UI from our portal design" — Claude will scaffold the entire app using the CLAUDE.md context.
+  </div>
+</div>
+
+<!-- STEP 5: KEY COMMANDS -->
+<div class="section">
+  <div class="section-num">Step 05</div>
+  <h2>Daily Development Commands</h2>
+  <p class="sub">Everything you need for day-to-day development in PowerShell.</p>
+
+  <div class="cmd-list">
+    <div class="cmd-item"><span class="cmd-code">npm run dev:db</span><span class="cmd-desc">Start local database (Supabase in Docker). Run this first, before anything else.</span></div>
+    <div class="cmd-item"><span class="cmd-code">npm run dev:web</span><span class="cmd-desc">Start Next.js web portal at http://localhost:3000</span></div>
+    <div class="cmd-item"><span class="cmd-code">npm run dev:mobile</span><span class="cmd-desc">Start Expo mobile app. Scan QR code with Expo Go on your phone.</span></div>
+    <div class="cmd-item"><span class="cmd-code">npm run test</span><span class="cmd-desc">Run all tests. Must pass before any deploy.</span></div>
+    <div class="cmd-item"><span class="cmd-code">npm run db:seed</span><span class="cmd-desc">Seed the South Asian food database (500+ dishes) into local DB.</span></div>
+    <div class="cmd-item"><span class="cmd-code">/dev-status</span><span class="cmd-desc">Claude Code slash command — checks what's running and what needs attention.</span></div>
+    <div class="cmd-item"><span class="cmd-code">/new-migration</span><span class="cmd-desc">Claude Code slash command — creates a new DB migration file with correct naming.</span></div>
+    <div class="cmd-item"><span class="cmd-code">/deploy-staging</span><span class="cmd-desc">Claude Code slash command — runs tests, builds, and pushes to staging safely.</span></div>
+  </div>
+</div>
+
+<!-- STEP 6: SECRETS SETUP -->
+<div class="section">
+  <div class="section-num">Step 06</div>
+  <h2>Secrets & API Keys Needed</h2>
+  <p class="sub">Fill these into .env.local for dev. Add them to Vercel dashboard for staging/prod.</p>
+
+  <table class="env-table">
+    <thead>
+      <tr><th>Variable</th><th>Where to Get It</th><th>Example / Notes</th><th></th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>ANTHROPIC_API_KEY</td>
+        <td>console.anthropic.com → API Keys</td>
+        <td>sk-ant-api03-...</td>
+        <td><span class="req">REQUIRED</span></td>
+      </tr>
+      <tr>
+        <td>NEXT_PUBLIC_SUPABASE_URL</td>
+        <td>Supabase project → Settings → API</td>
+        <td>https://xxx.supabase.co</td>
+        <td><span class="req">REQUIRED</span></td>
+      </tr>
+      <tr>
+        <td>NEXT_PUBLIC_SUPABASE_ANON_KEY</td>
+        <td>Supabase project → Settings → API</td>
+        <td>eyJhbGciOiJIUzI1N...</td>
+        <td><span class="req">REQUIRED</span></td>
+      </tr>
+      <tr>
+        <td>SUPABASE_SERVICE_ROLE_KEY</td>
+        <td>Supabase project → Settings → API</td>
+        <td>eyJhbGciOiJIUzI1N... (secret!)</td>
+        <td><span class="req">REQUIRED</span></td>
+      </tr>
+      <tr>
+        <td>RESEND_API_KEY</td>
+        <td>resend.com → API Keys</td>
+        <td>re_xxx... (free tier: 3K emails/mo)</td>
+        <td><span class="opt">optional</span></td>
+      </tr>
+      <tr>
+        <td>APP_SECRET</td>
+        <td>Generate locally</td>
+        <td>Run: openssl rand -hex 32</td>
+        <td><span class="req">REQUIRED</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="alert alert-warn" style="margin-top:16px">
+    <strong>⚠ Security:</strong> Never commit .env.local to Git. The .gitignore already blocks it. For Vercel (staging/prod), add these under Project → Settings → Environment Variables.
+  </div>
+</div>
+
+<footer>
+  <span>DesiDiabetiCoach</span> · Claude Code Setup Guide · Dennis David Katumalla · Casmendora Ventures LLC · June 2026
+  <span>claude-sonnet-4-6</span>
+</footer>
+
+</body>
+</html>

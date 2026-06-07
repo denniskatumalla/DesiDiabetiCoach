@@ -1,0 +1,37 @@
+{
+  "name": "desidiabeticoach",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI-powered diabetes management for South Asian communities",
+  "author": "Dennis David Katumalla <dennis@casmendora.com>",
+  "license": "UNLICENSED",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:web\" \"npm run dev:mobile\"",
+    "dev:web": "cd apps/web && npm run dev",
+    "dev:mobile": "cd apps/mobile && npx expo start",
+    "dev:db": "docker compose -f infrastructure/dev/docker-compose.yml up -d",
+    "dev:db:stop": "docker compose -f infrastructure/dev/docker-compose.yml down",
+    "dev:db:reset": "docker compose -f infrastructure/dev/docker-compose.yml down -v && npm run dev:db",
+    "build": "cd apps/web && npm run build",
+    "test": "jest --passWithNoTests",
+    "test:watch": "jest --watch",
+    "lint": "eslint . --ext .ts,.tsx --max-warnings 0",
+    "typecheck": "tsc --noEmit",
+    "db:migrate": "supabase db push",
+    "db:seed": "npx ts-node scripts/seed-foods.ts",
+    "db:studio": "supabase studio",
+    "setup": "node scripts/setup.js"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "concurrently": "^8.0.0",
+    "eslint": "^8.0.0",
+    "jest": "^29.0.0",
+    "ts-jest": "^29.0.0",
+    "typescript": "^5.0.0"
+  }
+}

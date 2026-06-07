@@ -1,0 +1,70 @@
+version: '3.8'
+
+# DesiDiabetiCoach — Local Development Stack
+# Run: docker compose up -d
+# Stop: docker compose down
+# Reset DB: docker compose down -v && docker compose up -d
+
+services:
+
+  # ── Supabase Local Stack ──────────────────────────────────────
+  # Equivalent to full Supabase cloud, running locally
+  supabase-db:
+    image: supabase/postgres:15.1.0.147
+    container_name: ddc_postgres
+    restart: unless-stopped
+    ports:
+      - "54322:5432"
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ddc_local_secret}
+      POSTGRES_DB: postgres
+    volumes:
+      - supabase_db_data:/var/lib/postgresql/data
+      - ./supabase/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  supabase-studio:
+    image: supabase/studio:20240422-5cf8f30
+    container_name: ddc_studio
+    restart: unless-stopped
+    ports:
+      - "54323:3000"
+    environment:
+      SUPABASE_URL: http://supabase-kong:8000
+      STUDIO_PG_META_URL: http://supabase-meta:8080
+      SUPABASE_ANON_KEY: ${SUPABASE_LOCAL_ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9}
+      SUPABASE_SERVICE_KEY: ${SUPABASE_LOCAL_SERVICE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9}
+    depends_on:
+      - supabase-db
+
+  # ── Mailhog (local email testing) ────────────────────────────
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: ddc_mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Web UI → http://localhost:8025
+
+  # ── Redis (for rate limiting + session cache) ─────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: ddc_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+volumes:
+  supabase_db_data:
+  redis_data:
+
+networks:
+  default:
+    name: desidiabeticoach_dev
