@@ -58,6 +58,9 @@ desktop.ini
 *.swp
 *.swo
 
+# ── Tooling artifacts ─────────────────────────────────────────
+.playwright-mcp/
+
 # ── Claude Code (keep CLAUDE.md and .claude/ tracked) ─────────
 # .claude/ is intentionally committed — contains project config
 # CLAUDE.md is intentionally committed — project context for Claude
