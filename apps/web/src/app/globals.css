@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand-navy: #0f2340;
+  --brand-teal: #1b8f8a;
+  --brand-saffron: #f59e0b;
+  --brand-white: #fafafa;
+  --brand-rose: #e05a5a;
+  --brand-jade: #22c55e;
+}
+
+body {
+  background-color: var(--brand-white);
+  color: var(--brand-navy);
+  /*
+   * Spec §0 calls for Plus Jakarta Sans / Inter / JetBrains Mono. Wire these
+   * up via next/font (self-hosted, no runtime network fetch) once real font
+   * files are added — system fonts are the placeholder for now so the build
+   * doesn't depend on network access to Google Fonts.
+   */
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+}

@@ -1,0 +1,53 @@
+{
+  "app.name": "DesiDiabetiCoach",
+  "app.tagline": "Know Your Food. Manage Your Health. In Your Language.",
+
+  "auth.login": "Log In",
+  "auth.signup": "Sign Up",
+  "auth.email": "Email",
+  "auth.password": "Password",
+  "auth.magicLink": "Send me a magic link instead",
+  "auth.logout": "Log Out",
+
+  "nav.dashboard": "Dashboard",
+  "nav.bg": "Log BG",
+  "nav.meals": "Log Meal",
+  "nav.medications": "Medications",
+  "nav.analytics": "Analytics",
+  "nav.coach": "AI Coach",
+  "nav.reports": "Reports",
+  "nav.settings": "Settings",
+
+  "onboarding.title": "Let's set up your diabetic profile",
+  "onboarding.step": "Step {current} of {total}",
+
+  "dashboard.lastBg": "Last BG",
+  "dashboard.tir": "Time in Range",
+  "dashboard.streak": "Adherence Streak",
+  "dashboard.caloriesToday": "Calories Today",
+
+  "bg.add": "Log a BG Reading",
+  "bg.value": "BG Value (mg/dL)",
+  "bg.context": "Context",
+  "bg.save": "Save Reading",
+  "bg.abnormalWarning": "This reading is outside safe range — contact your healthcare provider or seek emergency care if symptomatic.",
+
+  "meal.scan": "Scan Meal Photo",
+  "meal.manualSearch": "Search Foods",
+  "meal.logMeal": "Log Meal",
+  "meal.mobileOnlyNotice": "Meal photo scanning is available on the DesiDiabetiCoach mobile app. Log manually here, or view AI-scanned meals captured on your phone.",
+
+  "medication.add": "Add Medication",
+  "medication.taken": "Taken",
+  "medication.skipped": "Skipped",
+
+  "coach.placeholder": "Ask your coach anything about your food or blood sugar…",
+  "coach.disclaimer": "This is general wellness guidance, not medical advice. Consult your physician before changing your treatment plan.",
+
+  "reports.exportCsv": "Export CSV",
+
+  "common.save": "Save",
+  "common.cancel": "Cancel",
+  "common.loading": "Loading…",
+  "common.error": "Something went wrong. Please try again."
+}

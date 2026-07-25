@@ -1,0 +1,6 @@
+{
+  "name": "@desidiabeticoach/food-db",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./seed-data/foods.json"
+}

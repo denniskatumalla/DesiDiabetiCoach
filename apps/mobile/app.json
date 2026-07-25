@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "DesiDiabetiCoach",
+    "slug": "desidiabeticoach",
+    "scheme": "desidiabeticoach",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "backgroundColor": "#0F2340"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.candsillon.desidiabeticoach",
+      "infoPlist": {
+        "NSCameraUsageDescription": "DesiDiabetiCoach uses your camera to identify South Asian foods in your meal photos and estimate their nutritional impact.",
+        "NSPhotoLibraryUsageDescription": "Choose an existing meal photo to analyze."
+      }
+    },
+    "android": {
+      "package": "com.candsillon.desidiabeticoach",
+      "permissions": ["CAMERA"],
+      "adaptiveIcon": {
+        "backgroundColor": "#0F2340"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "DesiDiabetiCoach uses your camera to scan meal photos for AI food recognition."
+        }
+      ]
+    ],
+    "extra": {
+      "router": { "origin": false }
+    }
+  }
+}

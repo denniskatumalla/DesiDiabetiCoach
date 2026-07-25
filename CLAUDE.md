@@ -9,15 +9,12 @@ Owner: Dennis David Katumalla | Candsillon Technologies
 
 ## Current State
 
-The repo is in scaffold/bootstrap phase. The directory structure below is the **target layout** — most subdirectories do not exist yet and need to be created. Files currently at root that will move when scaffolding is complete:
-
-| File at root now         | Target location                              |
-| ------------------------ | -------------------------------------------- |
-| `001_initial_schema.sql` | `supabase/migrations/001_initial_schema.sql` |
-| `docker-compose.yml`     | `infrastructure/dev/docker-compose.yml`      |
-| `setup.js`               | `scripts/setup.js`                           |
-| `settings.json`          | `.claude/settings.json`                      |
-| `ci-cd.yml`              | `.github/workflows/ci-cd.yml`                |
+Scaffolding is complete and a working core MVP slice is implemented across
+web + iOS + Android — see [docs/ROADMAP.md](docs/ROADMAP.md) for exactly
+what's built vs. deliberately deferred (billing, PDF reports, social
+sharing, support chat, docs site, push notification infra, 5 of 6
+languages). See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) and
+[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md) to run and deploy it.
 
 ## Target Directory Structure
 
@@ -43,7 +40,7 @@ desidiabeticoach/
 - **Web**: Next.js 14 App Router, Tailwind CSS, shadcn/ui, Zustand, Supabase Auth
 - **API**: Next.js API routes + tRPC, Zod validation on all routes
 - **Database**: Supabase (PostgreSQL) with Row Level Security on all user tables
-- **AI**: Anthropic Claude API — model `claude-sonnet-4-6`, system prompt at `packages/shared/prompts/coach-system-prompt.ts`
+- **AI**: Anthropic Claude API — model `claude-sonnet-4-6`, system prompt at `packages/shared/src/prompts/coach-system-prompt.ts`
 - **Mobile**: React Native (Expo SDK 51), Expo Router, RevenueCat for payments
 - **Email**: Resend | **Storage**: Supabase Storage (meal photos)
 - **Hosting**: Vercel (web) + Expo EAS (mobile)
@@ -51,8 +48,8 @@ desidiabeticoach/
 ## Commands
 
 ```bash
-# First-time setup (copies .env.example → .env.local, starts Docker, runs migrations)
-node setup.js
+# First-time setup (copies .env.example → .env.local, starts Docker, runs migrations, seeds foods)
+npm run setup
 
 # Local dev database (Docker)
 npm run dev:db          # start

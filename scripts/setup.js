@@ -95,8 +95,16 @@ execSync('sleep 5');
 
 // ── 6. Run migrations ──────────────────────────────────────────
 console.log('\n🗄️  Running database migrations...');
-// For local dev without Supabase CLI linked, apply migrations directly
-run('docker exec ddc_postgres psql -U postgres -d postgres -f /docker-entrypoint-initdb.d/001_initial_schema.sql 2>/dev/null || echo "Migration may already be applied"');
+// For local dev without Supabase CLI linked, apply migrations directly, in order
+const migrationsDir = path.join(ROOT, 'supabase', 'migrations');
+const migrations = fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort();
+migrations.forEach((file) => {
+  run(`docker exec ddc_postgres psql -U postgres -d postgres -f /docker-entrypoint-initdb.d/${file} 2>/dev/null || echo "Migration ${file} may already be applied"`);
+});
+
+// ── 6b. Seed the South Asian food database ──────────────────────
+console.log('\n🍛 Seeding South Asian food database...');
+run('npm run db:seed');
 
 // ── 7. Done ────────────────────────────────────────────────────
 console.log('\n╔════════════════════════════════════════╗');

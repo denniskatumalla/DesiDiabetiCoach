@@ -35,6 +35,7 @@ web-build/
 *.tsbuildinfo
 dist/
 build/
+next-env.d.ts
 
 # ── Testing ───────────────────────────────────────────────────
 coverage/
