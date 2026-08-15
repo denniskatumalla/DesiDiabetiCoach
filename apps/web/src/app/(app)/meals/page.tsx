@@ -146,7 +146,7 @@ export default function MealsPage() {
                 <p className="text-xs text-brand-navy/50">
                   {new Date(meal.logged_at).toLocaleString()} · {meal.total_carbs_g}g carbs ·{' '}
                   {meal.total_calories} cal
-                  {meal.ai_analysis ? ' · scanned via mobile' : ''}
+                  {meal.ai_analysis !== null ? ' · scanned via mobile' : ''}
                 </p>
               </div>
             </div>

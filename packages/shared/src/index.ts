@@ -1,3 +1,5 @@
+export * from './database.types';
+
 export * from './schemas/bg-log';
 export * from './schemas/medication';
 export * from './schemas/a1c-log';

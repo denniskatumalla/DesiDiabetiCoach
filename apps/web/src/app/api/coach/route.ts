@@ -1,7 +1,15 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
-import { buildCoachSystemPrompt, isAbnormalBg, type CoachingContext } from '@desidiabeticoach/shared';
+import {
+  BgContext,
+  DiabetesType,
+  LanguageCode,
+  buildCoachSystemPrompt,
+  isAbnormalBg,
+  type CoachingContext,
+  type Database,
+} from '@desidiabeticoach/shared';
 import { createClient } from '@/lib/supabase/server';
 import { getAnthropicClient, CLAUDE_MODEL } from '@/lib/anthropic';
 
@@ -25,7 +33,7 @@ export async function POST(req: NextRequest) {
   const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
 
   const supabase = bearerToken
-    ? createSupabaseClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+    ? createSupabaseClient<Database>(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
         global: { headers: { Authorization: `Bearer ${bearerToken}` } },
       })
     : createClient();
@@ -60,13 +68,21 @@ export async function POST(req: NextRequest) {
     supabase.from('medications').select('name, frequency').eq('user_id', user.id).is('end_date', null),
   ]);
 
+  // These columns are TEXT + CHECK in Postgres, so the generated types widen
+  // them to `string | null`. Re-narrow through the domain enums rather than
+  // asserting: a legacy or hand-edited row falls back instead of sending an
+  // out-of-range value into the coaching prompt.
   const context: CoachingContext = {
-    diabetesType: profile?.diabetes_type ?? 'type2',
+    diabetesType: DiabetesType.catch('type2').parse(profile?.diabetes_type),
     a1cTarget: profile?.target_hba1c ?? 7.0,
-    language: profile?.language_pref ?? 'en',
+    language: LanguageCode.catch('en').parse(profile?.language_pref),
     dietaryRestrictions: profile?.dietary_restriction ? [profile.dietary_restriction] : [],
     cuisinePreference: profile?.cuisine_preference ?? 'mixed',
-    bgLogs14d: (bgLogs ?? []).map((b) => ({ value: b.value, context: b.context, timestamp: b.logged_at })),
+    bgLogs14d: (bgLogs ?? []).map((b) => ({
+      value: b.value,
+      context: BgContext.catch('random').parse(b.context),
+      timestamp: b.logged_at,
+    })),
     mealLogs7d: (mealLogs ?? []).map((m) => ({
       foods: (m.meal_items ?? []).map((i: { food_name_raw: string | null }) => i.food_name_raw ?? 'unknown'),
       totalGl: m.total_carbs_g ?? 0,

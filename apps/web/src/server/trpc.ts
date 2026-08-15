@@ -1,9 +1,10 @@
 import { initTRPC, TRPCError } from '@trpc/server';
 import { createClient as createServerClient } from '../lib/supabase/server';
 import { createClient as createSupabaseClient, type SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@desidiabeticoach/shared';
 
 export interface Context {
-  supabase: SupabaseClient;
+  supabase: SupabaseClient<Database>;
   userId: string | null;
 }
 
@@ -18,7 +19,7 @@ export async function createContext({ req }: { req: Request }): Promise<Context>
   const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
 
   if (bearerToken) {
-    const supabase = createSupabaseClient(
+    const supabase = createSupabaseClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       { global: { headers: { Authorization: `Bearer ${bearerToken}` } } }

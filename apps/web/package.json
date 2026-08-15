@@ -7,13 +7,14 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src --ext .ts,.tsx --max-warnings 0"
+    "lint": "eslint src --ext .ts,.tsx --max-warnings 0",
+    "test": "jest"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.27.0",
     "@desidiabeticoach/shared": "*",
     "@desidiabeticoach/ui": "*",
-    "@supabase/ssr": "^0.4.0",
+    "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.45.0",
     "@tanstack/react-query": "^5.51.0",
     "@trpc/client": "^11.0.0-rc.446",
@@ -27,6 +28,7 @@
     "zustand": "^4.5.0"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.0",
     "@types/node": "^20.0.0",
     "@types/react": "~18.2.79",
     "@types/react-dom": "~18.2.25",
@@ -35,8 +37,10 @@
     "autoprefixer": "^10.4.0",
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.0",
+    "jest": "^29.7.0",
     "postcss": "^8.4.0",
     "tailwindcss": "^3.4.0",
+    "ts-jest": "^29.1.0",
     "typescript": "^5.7.2"
   }
 }

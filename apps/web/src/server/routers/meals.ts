@@ -1,6 +1,19 @@
 import { z } from 'zod';
-import { MealLogInput, calculateGl } from '@desidiabeticoach/shared';
+import { MealLogInput, calculateGl, type Json, type Tables } from '@desidiabeticoach/shared';
 import { protectedProcedure, router } from '../trpc';
+
+/**
+ * Shape returned by the `*, meal_items(*)` join.
+ *
+ * `ai_analysis` is widened from the recursive `Json` type to `unknown`:
+ * tRPC's output-serialisation mapper recurses through `Json` and trips
+ * TS2589 in every client that reads this query. Clients cannot rely on its
+ * internal shape anyway — it is raw model output persisted for display.
+ */
+type MealLogWithItems = Omit<Tables<'meal_logs'>, 'ai_analysis'> & {
+  ai_analysis: unknown;
+  meal_items: Tables<'meal_items'>[];
+};
 
 export const mealsRouter = router({
   /** Manual food search — spec §5.5.4. `foods` has no RLS (public read). */
@@ -17,7 +30,9 @@ export const mealsRouter = router({
 
   list: protectedProcedure
     .input(z.object({ limit: z.number().min(1).max(100).default(20) }).optional())
-    .query(async ({ ctx, input }) => {
+    // Annotated explicitly: inferring the nested-select generic through tRPC
+    // trips TS2589 ("type instantiation is excessively deep") in consumers.
+    .query(async ({ ctx, input }): Promise<MealLogWithItems[]> => {
       const { data, error } = await ctx.supabase
         .from('meal_logs')
         .select('*, meal_items(*)')
@@ -26,7 +41,7 @@ export const mealsRouter = router({
         .limit(input?.limit ?? 20);
 
       if (error) throw error;
-      return data;
+      return data ?? [];
     }),
 
   create: protectedProcedure.input(MealLogInput).mutation(async ({ ctx, input }) => {
@@ -40,7 +55,8 @@ export const mealsRouter = router({
         meal_type: input.mealType,
         logged_at: input.loggedAt ?? new Date().toISOString(),
         photo_url: input.photoUrl,
-        ai_analysis: input.aiAnalysis ?? null,
+        // Validated upstream by FoodScanResult; the column is untyped JSONB.
+        ai_analysis: (input.aiAnalysis ?? null) as Json,
         total_carbs_g: totalCarbsG,
         total_calories: totalCalories,
         notes: input.notes,

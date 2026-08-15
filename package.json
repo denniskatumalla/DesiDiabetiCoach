@@ -17,6 +17,7 @@
     "test:watch": "cd packages/shared && npm run test -- --watch",
     "lint": "cd apps/web && npm run lint",
     "typecheck": "npm run typecheck --workspaces --if-present",
+    "check:env": "npx ts-node scripts/check-env.ts",
     "db:migrate": "supabase db push",
     "db:seed": "npx ts-node scripts/seed-foods.ts",
     "db:studio": "supabase studio",

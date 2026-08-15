@@ -44,9 +44,14 @@ export const coachRouter = router({
 
         if (fetchError) throw fetchError;
 
+        // `messages` is a JSONB column, so it is only `Json` at the type level.
+        // Guard rather than spreading blindly — a non-array value would throw
+        // at runtime and lose the turn.
+        const history = Array.isArray(existing.messages) ? existing.messages : [];
+
         const { error } = await ctx.supabase
           .from('ai_conversations')
-          .update({ messages: [...(existing.messages ?? []), ...input.messages] })
+          .update({ messages: [...history, ...input.messages] })
           .eq('id', input.sessionId);
 
         if (error) throw error;
