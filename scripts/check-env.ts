@@ -107,7 +107,11 @@ async function checkTables(db: SupabaseClient) {
 
   let missing = 0;
   for (const table of TABLES) {
-    const { error, count } = await db.from(table).select('*', { count: 'exact', head: true });
+    // NB: do not use `head: true` here. PostgREST answers a HEAD request for a
+    // missing table with a bodyless 404, and supabase-js surfaces that as
+    // `{ error: null, count: null }` — indistinguishable from an empty table.
+    // A normal GET returns the PGRST205 error, so absence is actually detected.
+    const { error, count } = await db.from(table).select('*', { count: 'exact' }).limit(1);
 
     if (error) {
       missing++;
@@ -127,9 +131,9 @@ async function checkTables(db: SupabaseClient) {
 async function checkSeed(db: SupabaseClient) {
   section('Seed data');
 
-  const { count, error } = await db.from('foods').select('*', { count: 'exact', head: true });
+  const { count, error } = await db.from('foods').select('*', { count: 'exact' }).limit(1);
   if (error) {
-    fail('Could not read the foods table', 'Apply the migrations first: npm run db:migrate');
+    fail(`Could not read the foods table — ${error.message}`, 'Apply the migrations first: npm run db:migrate');
     return;
   }
 
@@ -179,7 +183,7 @@ async function main() {
     });
 
     section('Database');
-    const { error } = await db.from('foods').select('id', { head: true }).limit(1);
+    const { error } = await db.from('foods').select('*').limit(1);
     // A missing table still proves the connection worked; only transport
     // failures mean we genuinely could not reach the project.
     if (error && /fetch|network|ENOTFOUND|ECONNREFUSED/i.test(error.message)) {
