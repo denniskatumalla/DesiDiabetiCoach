@@ -11,7 +11,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.27.0",
+    "@anthropic-ai/sdk": "^0.117.1",
     "@desidiabeticoach/shared": "*",
     "@desidiabeticoach/ui": "*",
     "@supabase/ssr": "^0.12.4",
