@@ -9,7 +9,7 @@
 
 -- ─── A1C LAB LOGS ──────────────────────────────────────────────
 CREATE TABLE public.a1c_logs (
-  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id         UUID NOT NULL REFERENCES public.user_profiles(id) ON DELETE CASCADE,
   test_date       DATE NOT NULL,
   value           NUMERIC(3,1) NOT NULL CHECK (value BETWEEN 3.0 AND 15.0),
@@ -22,7 +22,7 @@ CREATE INDEX idx_a1c_logs_user_date ON public.a1c_logs(user_id, test_date DESC);
 
 -- ─── STRUCTURED MEDICATIONS (distinct from the ad-hoc medication_logs) ──
 CREATE TABLE public.medications (
-  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id         UUID NOT NULL REFERENCES public.user_profiles(id) ON DELETE CASCADE,
   name            TEXT NOT NULL,
   dose_value      NUMERIC(6,2) NOT NULL,
@@ -42,7 +42,7 @@ CREATE INDEX idx_medications_user ON public.medications(user_id) WHERE end_date 
 
 -- ─── MEDICATION SCHEDULES (scheduled dose times per medication) ────────
 CREATE TABLE public.medication_schedules (
-  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   medication_id   UUID NOT NULL REFERENCES public.medications(id) ON DELETE CASCADE,
   scheduled_time  TIME NOT NULL,
   created_at      TIMESTAMPTZ DEFAULT NOW()

@@ -4,7 +4,12 @@
 -- Run: supabase db reset (dev) | supabase db push (staging/prod)
 -- ============================================================
 
--- Enable required extensions
+-- Enable required extensions.
+-- NOTE: primary keys use gen_random_uuid() (core Postgres 13+, resolved from
+-- pg_catalog) rather than uuid-ossp's uuid_generate_v4(). Supabase installs
+-- extensions into the `extensions` schema, which is not on the search_path
+-- used by `supabase db push`, so the unqualified uuid_generate_v4() call
+-- fails with "function does not exist" even though the extension is present.
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
@@ -35,7 +40,7 @@ CREATE TABLE public.user_profiles (
 
 -- ─── SOUTH ASIAN FOOD DATABASE ───────────────────────────────
 CREATE TABLE public.foods (
-  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   -- Names
   name_en         TEXT NOT NULL,          -- English: "Masoor Dal"
   name_regional   TEXT,                   -- Regional: "Masur Dal" / "Paruppu"
@@ -78,7 +83,7 @@ CREATE INDEX idx_foods_name ON public.foods USING gin(to_tsvector('english', nam
 
 -- ─── MEAL LOGS ────────────────────────────────────────────────
 CREATE TABLE public.meal_logs (
-  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id         UUID NOT NULL REFERENCES public.user_profiles(id) ON DELETE CASCADE,
   meal_type       TEXT CHECK (meal_type IN ('breakfast', 'lunch', 'dinner', 'snack', 'drink')),
   logged_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -102,7 +107,7 @@ CREATE INDEX idx_meal_logs_user_date ON public.meal_logs(user_id, logged_at DESC
 
 -- ─── MEAL ITEMS (foods within a meal log) ─────────────────────
 CREATE TABLE public.meal_items (
-  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   meal_log_id     UUID NOT NULL REFERENCES public.meal_logs(id) ON DELETE CASCADE,
   food_id         UUID REFERENCES public.foods(id),
   food_name_raw   TEXT,                   -- If not in DB, store as entered
@@ -114,7 +119,7 @@ CREATE TABLE public.meal_items (
 
 -- ─── BLOOD GLUCOSE LOGS ──────────────────────────────────────
 CREATE TABLE public.bg_logs (
-  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id         UUID NOT NULL REFERENCES public.user_profiles(id) ON DELETE CASCADE,
   value           INT NOT NULL,           -- mg/dL
   logged_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -131,7 +136,7 @@ CREATE INDEX idx_bg_logs_user_date ON public.bg_logs(user_id, logged_at DESC);
 
 -- ─── MEDICATION LOGS ─────────────────────────────────────────
 CREATE TABLE public.medication_logs (
-  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id         UUID NOT NULL REFERENCES public.user_profiles(id) ON DELETE CASCADE,
   medication_name TEXT NOT NULL,          -- 'Metformin', 'Glipizide', 'Ozempic'
   dose_mg         NUMERIC(6,1),
@@ -143,9 +148,9 @@ CREATE TABLE public.medication_logs (
 
 -- ─── AI COACH CONVERSATIONS ───────────────────────────────────
 CREATE TABLE public.ai_conversations (
-  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id         UUID NOT NULL REFERENCES public.user_profiles(id) ON DELETE CASCADE,
-  session_id      UUID DEFAULT uuid_generate_v4(),
+  session_id      UUID DEFAULT gen_random_uuid(),
   messages        JSONB NOT NULL DEFAULT '[]',  -- [{role, content, timestamp}]
   tokens_used     INT DEFAULT 0,
   started_at      TIMESTAMPTZ DEFAULT NOW(),
