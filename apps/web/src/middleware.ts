@@ -41,6 +41,12 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|api/trpc).*)',
+    // All of `api` is excluded, not just `api/trpc`. This middleware only
+    // reads the session cookie, but /api/coach and /api/reports/csv also
+    // accept an `Authorization: Bearer` token from the mobile app, which
+    // sends no cookies — redirecting those to /login made them unreachable
+    // from mobile. Every API route authenticates itself: tRPC via
+    // protectedProcedure, the two route handlers via their own 401 checks.
+    '/((?!_next/static|_next/image|favicon.ico|api).*)',
   ],
 };
