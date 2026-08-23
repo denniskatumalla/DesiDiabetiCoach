@@ -4,13 +4,23 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
-const NAV_ITEMS = [
-  { href: '/dashboard', label: 'Dashboard' },
-  { href: '/bg', label: 'Log BG' },
-  { href: '/meals', label: 'Log Meal' },
-  { href: '/medications', label: 'Medications' },
-  { href: '/coach', label: 'AI Coach' },
-  { href: '/reports', label: 'Reports' },
+const NAV_GROUPS = [
+  {
+    label: 'Today',
+    items: [
+      { href: '/dashboard', label: 'Dashboard' },
+      { href: '/bg', label: 'Log BG' },
+      { href: '/meals', label: 'Log Meal' },
+      { href: '/medications', label: 'Medications' },
+    ],
+  },
+  {
+    label: 'Support',
+    items: [
+      { href: '/coach', label: 'AI Coach' },
+      { href: '/reports', label: 'Reports' },
+    ],
+  },
 ];
 
 export function Sidebar() {
@@ -25,40 +35,82 @@ export function Sidebar() {
   }
 
   return (
-    <nav className="flex h-screen w-60 flex-col border-r border-brand-navy/10 bg-white px-3 py-6">
-      <Link href="/dashboard" className="mb-8 px-3 font-display text-lg font-bold text-brand-navy">
-        DesiDiabetiCoach
+    <nav
+      aria-label="Main"
+      className="sticky top-0 flex h-screen w-16 shrink-0 flex-col bg-ink text-fg sm:w-60"
+    >
+      <Link
+        href="/dashboard"
+        className="flex h-16 items-center justify-center border-b border-ink-rule px-4 sm:justify-start sm:px-5"
+      >
+        <span className="font-display text-sm font-bold tracking-tight max-sm:hidden">
+          DesiDiabetiCoach
+        </span>
+        <span aria-hidden className="font-display text-lg font-bold text-accent sm:hidden">
+          D
+        </span>
       </Link>
 
-      <ul className="flex-1 space-y-1">
-        {NAV_ITEMS.map((item) => {
-          const active = pathname === item.href;
-          return (
-            <li key={item.href}>
-              <Link
-                href={item.href}
-                className={`block rounded-control px-3 py-2 text-sm font-medium transition-colors ${
-                  active
-                    ? 'border-l-2 border-brand-teal bg-brand-teal/5 text-brand-teal'
-                    : 'text-brand-navy/70 hover:bg-brand-navy/5'
-                }`}
-              >
-                {item.label}
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+      <div className="flex-1 overflow-y-auto py-6">
+        {NAV_GROUPS.map((group) => (
+          <div key={group.label} className="mb-7">
+            <p className="eyebrow mb-2 px-5 text-fg/35 max-sm:hidden">{group.label}</p>
+            <ul>
+              {group.items.map((item) => {
+                const active = pathname === item.href;
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      aria-current={active ? 'page' : undefined}
+                      title={item.label}
+                      className={`relative flex items-center gap-3 px-5 py-2.5 text-sm transition-colors max-sm:justify-center max-sm:px-0 ${
+                        active ? 'text-fg' : 'text-fg/55 hover:bg-fg/5 hover:text-fg'
+                      }`}
+                    >
+                      {/* Active state is a saffron compartment marker, not a fill. */}
+                      <span
+                        aria-hidden
+                        className={`absolute left-0 top-1/2 h-6 w-[3px] -translate-y-1/2 rounded-r bg-accent transition-opacity ${
+                          active ? 'opacity-100' : 'opacity-0'
+                        }`}
+                      />
+                      <span className="max-sm:hidden">{item.label}</span>
+                      <span aria-hidden className="font-mono text-xs sm:hidden">
+                        {item.label.slice(0, 2)}
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
+      </div>
 
-      <div className="space-y-1 border-t border-brand-navy/10 pt-3">
-        <Link href="/settings" className="block rounded-control px-3 py-2 text-sm text-brand-navy/70 hover:bg-brand-navy/5">
+      <div className="border-t border-ink-rule py-3">
+        {/* Carries the same active marker as the main groups — without it,
+            nothing in the rail indicates you are on the settings page. */}
+        <Link
+          href="/settings"
+          aria-current={pathname === '/settings' ? 'page' : undefined}
+          className={`relative block px-5 py-2.5 text-sm transition-colors max-sm:text-center max-sm:text-xs ${
+            pathname === '/settings' ? 'text-fg' : 'text-fg/55 hover:bg-fg/5 hover:text-fg'
+          }`}
+        >
+          <span
+            aria-hidden
+            className={`absolute left-0 top-1/2 h-6 w-[3px] -translate-y-1/2 rounded-r bg-accent transition-opacity ${
+              pathname === '/settings' ? 'opacity-100' : 'opacity-0'
+            }`}
+          />
           Settings
         </Link>
         <button
           onClick={handleLogout}
-          className="block w-full rounded-control px-3 py-2 text-left text-sm text-brand-navy/70 hover:bg-brand-navy/5"
+          className="block w-full px-5 py-2.5 text-left text-sm text-fg/55 transition-colors hover:bg-fg/5 hover:text-fg max-sm:text-center max-sm:text-xs"
         >
-          Log Out
+          Log out
         </button>
       </div>
     </nav>

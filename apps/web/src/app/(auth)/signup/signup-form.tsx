@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Button, Card } from '@desidiabeticoach/ui';
+import { Button } from '@desidiabeticoach/ui';
+import { AuthField, AuthShell } from '@/components/auth-shell';
 import { createClient } from '@/lib/supabase/client';
 
 export function SignupForm() {
@@ -28,48 +29,50 @@ export function SignupForm() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-brand-white px-4">
-      <Card className="w-full max-w-sm">
-        <h1 className="font-display text-2xl font-bold text-brand-navy">Create Your Account</h1>
-
-        {submitted ? (
-          <p className="mt-4 text-sm text-brand-navy/70">
-            Check your email to confirm your account, then log in and complete your diabetic
-            profile.
-          </p>
-        ) : (
-          <form onSubmit={handleSignup} className="mt-4 space-y-3">
-            <input
-              type="email"
-              required
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-control border border-brand-navy/20 px-3 py-2.5"
-            />
-            <input
-              type="password"
-              required
-              minLength={8}
-              placeholder="Password (min. 8 characters)"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-control border border-brand-navy/20 px-3 py-2.5"
-            />
-            {error && <p className="text-sm text-brand-rose">{error}</p>}
-            <Button type="submit" disabled={loading} className="w-full">
-              {loading ? 'Creating account…' : 'Sign Up'}
-            </Button>
-          </form>
-        )}
-
-        <p className="mt-6 text-center text-sm text-brand-navy/60">
+    <AuthShell
+      eyebrow="Free to start"
+      title="Create your account"
+      footer={
+        <>
           Already have an account?{' '}
-          <Link href="/login" className="text-brand-teal hover:underline">
+          <Link href="/login" className="text-brand-saffron underline-offset-4 hover:underline">
             Log in
           </Link>
+        </>
+      }
+    >
+      {submitted ? (
+        <p className="text-sm leading-relaxed text-white/70">
+          Check your email to confirm your account, then log in and complete your diabetic
+          profile.
         </p>
-      </Card>
-    </main>
+      ) : (
+        <form onSubmit={handleSignup} className="space-y-3">
+          <AuthField
+            type="email"
+            required
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <AuthField
+            type="password"
+            required
+            minLength={8}
+            placeholder="Password (min. 8 characters)"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          {error && (
+            <p role="alert" className="font-mono text-[13px] text-brand-rose">
+              {error}
+            </p>
+          )}
+          <Button type="submit" variant="saffron" size="lg" disabled={loading} className="w-full">
+            {loading ? 'Creating account…' : 'Sign up'}
+          </Button>
+        </form>
+      )}
+    </AuthShell>
   );
 }

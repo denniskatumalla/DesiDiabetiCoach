@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { toCsv } from '@/lib/csv';
 
 /** Spec §5.8 — Personal Report export. MVP ships CSV; full branded PDF is roadmapped. */
 export async function GET(req: NextRequest) {
@@ -58,14 +59,6 @@ export async function GET(req: NextRequest) {
   }
 
   return new Response('Unknown report type', { status: 400 });
-}
-
-function toCsv(headers: string[], rows: (string | number | boolean | null)[][]): string {
-  const escape = (v: string | number | boolean | null) => {
-    const s = String(v ?? '');
-    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-  };
-  return [headers.join(','), ...rows.map((r) => r.map(escape).join(','))].join('\n');
 }
 
 function csvResponse(csv: string, filename: string) {

@@ -1,4 +1,4 @@
-import { foodScanRouter } from './food-scan';
+import { foodScanRouter, ScanInput, MAX_IMAGE_BASE64_CHARS } from './food-scan';
 import { getAnthropicClient } from '../../lib/anthropic';
 import { createSupabaseMock } from '../../test/supabase-mock';
 
@@ -151,7 +151,11 @@ describe('foodScan.scan — low-confidence flagging', () => {
   });
 });
 
+// An unreadable response is our problem, not a bad photo — the two must not
+// share a message, or the user is told to retake a picture that was fine.
 describe('foodScan.scan — failure modes', () => {
+  const UNREADABLE = 'Could not read the scan result. Please try again.';
+
   it('errors when the model returns no text block', async () => {
     mockCreate.mockResolvedValue({ content: [] });
 
@@ -164,15 +168,14 @@ describe('foodScan.scan — failure modes', () => {
   it('errors on malformed JSON rather than surfacing a parse exception', async () => {
     respondWith('I could not identify this meal.');
 
-    await expect(caller().scan({ imageBase64: 'x' })).rejects.toMatchObject({
-      message: 'No food detected in this image.',
-    });
+    await expect(caller().scan({ imageBase64: 'x' })).rejects.toMatchObject({ message: UNREADABLE });
   });
 
-  it('errors when the model reports zero items', async () => {
+  it('reports an empty plate as no food detected, not as a broken response', async () => {
     respondWith(JSON.stringify({ items: [], thali_detected: false, raw_description: 'empty plate' }));
 
     await expect(caller().scan({ imageBase64: 'x' })).rejects.toMatchObject({
+      code: 'NOT_FOUND',
       message: 'No food detected in this image.',
     });
   });
@@ -181,17 +184,55 @@ describe('foodScan.scan — failure modes', () => {
     // gi_score out of the 0..100 range the schema allows
     respondWith(JSON.stringify({ items: [{ ...ITEM, gi_score: 250 }], thali_detected: false, raw_description: '' }));
 
-    await expect(caller().scan({ imageBase64: 'x' })).rejects.toMatchObject({
-      message: 'No food detected in this image.',
-    });
+    await expect(caller().scan({ imageBase64: 'x' })).rejects.toMatchObject({ message: UNREADABLE });
   });
 
   it('errors when a required nutrition field is missing', async () => {
     const { carbs_g: _omitted, ...withoutCarbs } = ITEM;
     respondWith(JSON.stringify({ items: [withoutCarbs], thali_detected: false, raw_description: '' }));
 
-    await expect(caller().scan({ imageBase64: 'x' })).rejects.toMatchObject({
-      message: 'No food detected in this image.',
+    await expect(caller().scan({ imageBase64: 'x' })).rejects.toMatchObject({ message: UNREADABLE });
+  });
+});
+
+// Vision calls are the most expensive request the app makes, so neither the
+// payload size nor the call rate may be left to the client to police.
+describe('foodScan.scan — cost controls', () => {
+  // Asserted against the schema rather than by driving a multi-megabyte string
+  // through the router and its mocks: jest retains every recorded call
+  // argument for the lifetime of the worker, and payloads that size exhaust it.
+  it('bounds the image payload under the Anthropic image ceiling', () => {
+    expect(MAX_IMAGE_BASE64_CHARS).toBeLessThan(5 * 1024 * 1024);
+    // ...but comfortably above the ~2MB the mobile client produces.
+    expect(MAX_IMAGE_BASE64_CHARS).toBeGreaterThan(2 * 1024 * 1024);
+  });
+
+  it('rejects an image payload one character over the ceiling', () => {
+    const oversized = 'x'.repeat(MAX_IMAGE_BASE64_CHARS + 1);
+
+    expect(ScanInput.safeParse({ imageBase64: oversized }).success).toBe(false);
+    expect(ScanInput.safeParse({ imageBase64: oversized.slice(1) }).success).toBe(true);
+  });
+
+  it('returns TOO_MANY_REQUESTS without calling the model once the budget is spent', async () => {
+    const limited = foodScanRouter.createCaller({
+      supabase: createSupabaseMock({}, { rateLimitAllows: false }).supabase,
+      userId: 'user-1',
     });
+
+    await expect(limited.scan({ imageBase64: 'x' })).rejects.toMatchObject({ code: 'TOO_MANY_REQUESTS' });
+    expect(mockCreate).not.toHaveBeenCalled();
+  });
+
+  it('consumes one unit of the food-scan budget per call', async () => {
+    const mock = createSupabaseMock();
+    const c = foodScanRouter.createCaller({ supabase: mock.supabase, userId: 'user-1' });
+    respondWith(JSON.stringify({ items: [ITEM], thali_detected: false, raw_description: '' }));
+
+    await c.scan({ imageBase64: 'x' });
+
+    expect(mock.argsFor('rpc:consume_rate_limit', 'rpc')).toEqual([
+      expect.objectContaining({ p_action: 'food_scan' }),
+    ]);
   });
 });

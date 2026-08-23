@@ -26,11 +26,34 @@ export const ChatMessage = z.object({
 });
 export type ChatMessage = z.infer<typeof ChatMessage>;
 
+/**
+ * A prior turn replayed to the model so follow-ups ("what about the other
+ * one?") keep their context. Bounded on both axes because the client supplies
+ * it and it is billed as input tokens on every request.
+ */
+export const CoachHistoryTurn = z.object({
+  role: z.enum(['user', 'assistant']),
+  content: z.string().min(1).max(4000),
+});
+export type CoachHistoryTurn = z.infer<typeof CoachHistoryTurn>;
+
+/** Turns of history the client should send, and the server will accept. */
+export const COACH_HISTORY_LIMIT = 20;
+
 export const CoachChatInput = z.object({
   sessionId: z.string().uuid().optional(),
   message: z.string().min(1).max(2000),
+  history: z.array(CoachHistoryTurn).max(COACH_HISTORY_LIMIT).default([]),
 });
 export type CoachChatInput = z.infer<typeof CoachChatInput>;
+
+/**
+ * Spec §5.6.4 — how recent an abnormal reading must be to raise the safety
+ * banner. The banner tells the user to consider emergency care, so it has to
+ * track the reading in front of them: attaching it to anything in the 14-day
+ * coaching window meant one resolved excursion produced a fortnight of alarms.
+ */
+export const ABNORMAL_BG_ALERT_WINDOW_MS = 6 * 60 * 60 * 1000;
 
 /** Spec §5.6.4 — every coaching response carries this footer */
 export const COACHING_DISCLAIMER =

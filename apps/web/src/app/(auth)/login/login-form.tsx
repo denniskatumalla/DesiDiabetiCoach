@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Button, Card } from '@desidiabeticoach/ui';
+import { Button } from '@desidiabeticoach/ui';
+import { AuthField, AuthShell } from '@/components/auth-shell';
 import { createClient } from '@/lib/supabase/client';
 
 export function LoginForm() {
@@ -40,53 +41,55 @@ export function LoginForm() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-brand-white px-4">
-      <Card className="w-full max-w-sm">
-        <h1 className="font-display text-2xl font-bold text-brand-navy">Log In</h1>
-
-        {magicLinkSent ? (
-          <p className="mt-4 text-sm text-brand-navy/70">
-            Check your email for a magic link to log in.
-          </p>
-        ) : (
-          <form onSubmit={handlePasswordLogin} className="mt-4 space-y-3">
-            <input
-              type="email"
-              required
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-control border border-brand-navy/20 px-3 py-2.5"
-            />
-            <input
-              type="password"
-              required
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-control border border-brand-navy/20 px-3 py-2.5"
-            />
-            {error && <p className="text-sm text-brand-rose">{error}</p>}
-            <Button type="submit" disabled={loading} className="w-full">
-              {loading ? 'Logging in…' : 'Log In'}
-            </Button>
-            <button
-              type="button"
-              onClick={handleMagicLink}
-              className="w-full text-sm text-brand-teal hover:underline"
-            >
-              Send me a magic link instead
-            </button>
-          </form>
-        )}
-
-        <p className="mt-6 text-center text-sm text-brand-navy/60">
+    <AuthShell
+      eyebrow="Welcome back"
+      title="Log in"
+      footer={
+        <>
           New here?{' '}
-          <Link href="/signup" className="text-brand-teal hover:underline">
+          <Link href="/signup" className="text-brand-saffron underline-offset-4 hover:underline">
             Create an account
           </Link>
+        </>
+      }
+    >
+      {magicLinkSent ? (
+        <p className="text-sm leading-relaxed text-white/70">
+          Check your email for a magic link to log in.
         </p>
-      </Card>
-    </main>
+      ) : (
+        <form onSubmit={handlePasswordLogin} className="space-y-3">
+          <AuthField
+            type="email"
+            required
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <AuthField
+            type="password"
+            required
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          {error && (
+            <p role="alert" className="font-mono text-[13px] text-brand-rose">
+              {error}
+            </p>
+          )}
+          <Button type="submit" variant="saffron" size="lg" disabled={loading} className="w-full">
+            {loading ? 'Logging in…' : 'Log in'}
+          </Button>
+          <button
+            type="button"
+            onClick={handleMagicLink}
+            className="w-full py-1 text-sm text-white/60 underline-offset-4 transition-colors hover:text-white hover:underline"
+          >
+            Send me a magic link instead
+          </button>
+        </form>
+      )}
+    </AuthShell>
   );
 }

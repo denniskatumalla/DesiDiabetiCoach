@@ -13,6 +13,7 @@ export * from './constants/theme';
 export * from './constants/bg-context';
 
 export * from './utils/gi-gl';
+export * from './utils/scan-to-meal';
 
 export * from './prompts/coach-system-prompt';
 export * from './prompts/food-scan-prompt';

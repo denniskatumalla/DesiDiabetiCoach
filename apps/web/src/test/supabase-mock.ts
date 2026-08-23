@@ -66,6 +66,15 @@ function createQueryBuilder(table: string, result: QueryResult, calls: RecordedC
   return builder;
 }
 
+export interface MockOptions {
+  /** `auth.getUser()` resolves to this (`null` = signed out). */
+  user?: { id: string } | null;
+  /** What `rpc('consume_rate_limit', …)` returns — `false` means over budget. */
+  rateLimitAllows?: boolean;
+  /** Signed URLs keyed by storage object path, for `createSignedUrls`. */
+  signedUrls?: Record<string, string>;
+}
+
 export interface SupabaseMock {
   /** Cast to `SupabaseClient` so it can be dropped straight into a tRPC context. */
   supabase: SupabaseClient<Database>;
@@ -82,12 +91,17 @@ export interface SupabaseMock {
  * @param results Per-table `{ data, error }`. Pass an array to return a
  *   different result for each successive `.from(table)` call — needed where a
  *   single procedure hits the same table twice.
- * @param user The value `auth.getUser()` resolves to (`null` = signed out).
+ * @param userOrOptions The value `auth.getUser()` resolves to, or a
+ *   {@link MockOptions} object when a test also needs to control the rate
+ *   limiter or storage signing.
  */
 export function createSupabaseMock(
   results: Record<string, QueryResult | QueryResult[]> = {},
-  user: { id: string } | null = null
+  userOrOptions: { id: string } | null | MockOptions = null
 ): SupabaseMock {
+  const options: MockOptions =
+    userOrOptions !== null && 'id' in userOrOptions ? { user: userOrOptions } : (userOrOptions ?? {});
+  const user = options.user ?? null;
   const calls: RecordedCall[] = [];
   const cursors: Record<string, number> = {};
 
@@ -111,6 +125,21 @@ export function createSupabaseMock(
     from,
     auth: {
       getUser: () => Promise.resolve({ data: { user }, error: null }),
+    },
+    rpc: (fn: string, args: unknown) => {
+      calls.push({ table: `rpc:${fn}`, method: 'rpc', args: [args] });
+      return Promise.resolve({ data: options.rateLimitAllows ?? true, error: null });
+    },
+    storage: {
+      from: (bucket: string) => ({
+        createSignedUrls: (paths: string[], expiresIn: number) => {
+          calls.push({ table: `storage:${bucket}`, method: 'createSignedUrls', args: [paths, expiresIn] });
+          return Promise.resolve({
+            data: paths.map((path) => ({ path, signedUrl: options.signedUrls?.[path] ?? `signed:${path}` })),
+            error: null,
+          });
+        },
+      }),
     },
   };
 

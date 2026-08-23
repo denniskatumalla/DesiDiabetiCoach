@@ -19,9 +19,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="flex min-h-screen bg-brand-white">
+    // `app-shell` is what globals.css keys the doubled type scale off.
+    <div className="app-shell flex min-h-screen bg-ink">
       <Sidebar />
-      <div className="flex-1 overflow-y-auto p-6 sm:p-8">{children}</div>
+      {/* Content sits on a marginally raised ground so the rail still reads as
+          a separate compartment without a hard light/dark seam down the page. */}
+      <main className="min-w-0 flex-1 bg-ink-raised/40 px-5 py-8 sm:px-10 sm:py-12">
+        <div className="mx-auto max-w-6xl">{children}</div>
+      </main>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 /**
  * Supabase schema types.
  *
- * HAND-DERIVED from `supabase/migrations/*.sql` (001 + 002), because local
+ * HAND-DERIVED from `supabase/migrations/*.sql` (001–003), because local
  * type generation needs a running database and Docker is unavailable in this
  * environment. The shape deliberately matches what the Supabase CLI emits, so
  * it can be replaced wholesale once a database exists:
@@ -535,9 +535,36 @@ export interface Database {
           },
         ];
       };
+      rate_limits: {
+        Row: {
+          bucket_key: string;
+          window_start: string;
+          hits: number;
+        };
+        Insert: {
+          bucket_key: string;
+          window_start?: string;
+          hits?: number;
+        };
+        Update: {
+          bucket_key?: string;
+          window_start?: string;
+          hits?: number;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<never, never>;
-    Functions: Record<never, never>;
+    Functions: {
+      consume_rate_limit: {
+        Args: {
+          p_action: string;
+          p_max_hits: number;
+          p_window_seconds: number;
+        };
+        Returns: boolean;
+      };
+    };
     Enums: Record<never, never>;
     CompositeTypes: Record<never, never>;
   };

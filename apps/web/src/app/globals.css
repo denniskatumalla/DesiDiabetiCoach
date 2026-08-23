@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 :root {
+  /* Spec §0 brand — mirrored from packages/shared/src/constants/theme.ts */
   --brand-navy: #0f2340;
   --brand-teal: #1b8f8a;
   --brand-saffron: #f59e0b;
@@ -11,20 +12,136 @@
   --brand-jade: #22c55e;
 }
 
-body {
-  background-color: var(--brand-white);
-  color: var(--brand-navy);
+/**
+ * Theme tokens.
+ *
+ * Values are space-separated RGB channels so Tailwind can compose them with
+ * opacity modifiers (`text-fg/60`) via `rgb(var(--c-fg) / <alpha-value>)`.
+ * Because the whole app already speaks in these token names, switching themes
+ * changes only the values here — no component needs a `dark:` variant.
+ *
+ * Dark is the default. Selectors are attribute-based rather than `:root`-only
+ * so a subtree can pin its own theme: the marketing and auth pages carry
+ * `data-theme="dark"` to keep their committed identity whatever the user picks.
+ */
+:root,
+[data-theme='dark'] {
+  --c-bg: 8 19 31; /* #08131F */
+  --c-surface: 19 42 69; /* #132A45 */
+  --c-rule: 36 64 92; /* #24405C */
+  --c-fg: 255 255 255;
+  /* Saffron reads well on the dark ground at small sizes. */
+  --c-accent: 245 158 11; /* #F59E0B */
+  color-scheme: dark;
+}
+
+[data-theme='light'] {
+  --c-bg: 241 245 246; /* #F1F5F6 */
+  --c-surface: 255 255 255;
+  --c-rule: 216 225 229; /* #D8E1E5 */
+  --c-fg: 15 35 64; /* brand navy */
+  /* Saffron is only 2.1:1 on a light surface, so the accent steps down to a
+     deeper amber for eyebrows and small labels. */
+  --c-accent: 180 83 9; /* #B45309 */
+  color-scheme: light;
+}
+
+/* No explicit choice stored: follow the operating system. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']):not([data-theme='light']) {
+    --c-bg: 241 245 246;
+    --c-surface: 255 255 255;
+    --c-rule: 216 225 229;
+    --c-fg: 15 35 64;
+    --c-accent: 180 83 9;
+    color-scheme: light;
+  }
+}
+
+/**
+ * The signed-in app runs at double the base type scale.
+ *
+ * Tailwind sizes both text and spacing in rem, so moving the root size scales
+ * the whole interface proportionally — nothing overflows the way it would if
+ * only the glyphs grew inside fixed-width cards. `:has()` scopes it to the
+ * app shell, leaving the marketing and auth pages at their designed scale.
+ *
+ * To dial it back, change this one number: 150% is a gentler bump.
+ */
+html:has(.app-shell) {
+  font-size: 200%;
+}
+
+@layer base {
   /*
-   * Spec §0 calls for Plus Jakarta Sans / Inter / JetBrains Mono. Wire these
-   * up via next/font (self-hosted, no runtime network fetch) once real font
-   * files are added — system fonts are the placeholder for now so the build
-   * doesn't depend on network access to Google Fonts.
+   * `color-scheme` is set per theme above rather than pinned here, so the
+   * browser paints its own chrome to match: scrollbars, native <select>
+   * dropdowns, date pickers and autofill all follow the chosen theme instead
+   * of flashing the opposite one.
    */
-  font-family:
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    Roboto,
-    sans-serif;
+  body {
+    background-color: rgb(var(--c-bg));
+    color: rgb(var(--c-fg));
+    /*
+     * Spec §0 calls for Plus Jakarta Sans / Inter / JetBrains Mono. Wire these
+     * up via next/font (self-hosted, no runtime network fetch) once real font
+     * files are added — the stacks in tailwind.config.ts are the placeholder,
+     * chosen so they resolve to real faces rather than a generic fallback.
+     */
+    font-family: theme('fontFamily.body');
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Headings are set tight; the type scale lives in tailwind.config.ts. */
+  h1,
+  h2,
+  h3 {
+    font-family: theme('fontFamily.display');
+    text-wrap: balance;
+  }
+
+  /* Keyboard focus must stay visible everywhere, including on dark grounds. */
+  :focus-visible {
+    outline: 2px solid var(--brand-saffron);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
+@layer components {
+  /** Uppercase monospace label — the recurring structural voice. */
+  .eyebrow {
+    @apply font-mono text-eyebrow uppercase;
+  }
+
+  /*
+   * There is deliberately no scroll-reveal here. Two implementations were
+   * tried — an IntersectionObserver and a CSS `animation-timeline: view()` —
+   * and both left sections stranded at `opacity: 0` in contexts that do not
+   * scroll: print, full-page capture, and any run where the timeline does not
+   * resolve. On a marketing page the content is the point and the entrance is
+   * not, so the entrance is gone. The load-in animation on the hero is bounded
+   * by time rather than scroll position and is safe.
+   */
+
+  /** Edge fade for the dish marquee, so names enter and leave rather than clip. */
+  .marquee-mask {
+    mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  }
+}
+
+/*
+ * Motion is decorative here — every animated element is fully legible in its
+ * final state, so reduced-motion users simply get that state immediately.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }

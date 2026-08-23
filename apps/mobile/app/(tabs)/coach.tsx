@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { COACHING_DISCLAIMER, COACH_HISTORY_LIMIT } from '@desidiabeticoach/shared';
 import { supabase } from '@/lib/supabase';
+import { trpc } from '@/lib/trpc';
 import { COLORS } from '@/lib/theme';
 
 interface DisplayMessage {
@@ -20,10 +22,17 @@ export default function CoachScreen() {
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
+  // Set by the first append so later turns extend the same conversation row.
+  const sessionId = useRef<string | undefined>(undefined);
+
+  const appendMessages = trpc.coach.appendMessages.useMutation();
 
   async function sendMessage() {
     const text = input.trim();
     if (!text || sending) return;
+
+    // Captured before the optimistic append so it holds only completed turns.
+    const history = messages.slice(-COACH_HISTORY_LIMIT);
 
     setMessages((m) => [...m, { role: 'user', content: text }]);
     setInput('');
@@ -40,11 +49,39 @@ export default function CoachScreen() {
           'Content-Type': 'application/json',
           ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
         },
-        body: JSON.stringify({ message: text }),
+        body: JSON.stringify({ message: text, history }),
       });
 
       const replyText = await res.text();
+
+      // Without this check a 401 or 429 body is rendered as a message from the
+      // coach — a chat bubble reading "Unauthorized".
+      if (!res.ok) {
+        setMessages((m) => [
+          ...m,
+          {
+            role: 'assistant',
+            content:
+              res.status === 429 ? replyText : 'Something went wrong reaching your coach. Please try again.',
+          },
+        ]);
+        return;
+      }
+
       setMessages((m) => [...m, { role: 'assistant', content: replyText }]);
+
+      // Persist the completed exchange; a failure here must not break the chat.
+      const timestamp = new Date().toISOString();
+      appendMessages.mutate(
+        {
+          sessionId: sessionId.current,
+          messages: [
+            { role: 'user', content: text, timestamp },
+            { role: 'assistant', content: replyText, timestamp },
+          ],
+        },
+        { onSuccess: (result) => (sessionId.current = result.sessionId) }
+      );
     } catch {
       setMessages((m) => [...m, { role: 'assistant', content: 'Something went wrong reaching your coach.' }]);
     } finally {
@@ -73,10 +110,7 @@ export default function CoachScreen() {
         {sending && <Text style={styles.placeholder}>Thinking…</Text>}
       </ScrollView>
 
-      <Text style={styles.disclaimer}>
-        This is general wellness guidance, not medical advice. Consult your physician before
-        changing your treatment plan.
-      </Text>
+      <Text style={styles.disclaimer}>{COACHING_DISCLAIMER}</Text>
 
       <View style={styles.inputRow}>
         <TextInput

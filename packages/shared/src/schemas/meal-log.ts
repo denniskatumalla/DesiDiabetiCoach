@@ -18,7 +18,13 @@ export const MealLogInput = z.object({
   mealType: MealType,
   loggedAt: z.string().datetime().optional(),
   items: z.array(MealItemInput).min(1),
-  photoUrl: z.string().url().optional(),
+  /**
+   * Object path within the private `meal-photos` bucket, e.g.
+   * `<user-id>/<timestamp>.jpg` — never a signed URL. Signed URLs expire, so
+   * persisting one leaves every photo in the history broken a day later;
+   * `meals.list` signs the stored path on read instead.
+   */
+  photoPath: z.string().min(1).max(255).optional(),
   aiAnalysis: z.unknown().optional(),
   notes: z.string().max(500).optional(),
 });

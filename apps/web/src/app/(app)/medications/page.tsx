@@ -48,10 +48,11 @@ export default function MedicationsPage() {
 
   return (
     <div>
-      <h1 className="font-display text-2xl font-bold text-brand-navy">Medications</h1>
+      <p className="eyebrow text-accent">Your regimen</p>
+      <h1 className="mt-2 font-display text-display-md font-bold text-fg">Medications</h1>
 
       <Card className="mt-6 max-w-md">
-        <h2 className="mb-3 text-[13px] font-semibold uppercase tracking-[0.08em] text-brand-navy/40">
+        <h2 className="eyebrow mb-3 text-fg/45">
           Add Medication
         </h2>
         <form onSubmit={handleAdd} className="space-y-3">
@@ -61,7 +62,7 @@ export default function MedicationsPage() {
             placeholder="Medication name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-control border border-brand-navy/20 px-3 py-2.5"
+            className="w-full rounded-control border border-ink-rule bg-ink-raised px-3.5 py-2.5 text-sm text-fg transition-colors placeholder:text-fg/35 hover:border-brand-navy/25 focus:border-brand-teal"
           />
           <datalist id="common-medications">
             {COMMON_MEDICATIONS.map((m) => (
@@ -75,12 +76,12 @@ export default function MedicationsPage() {
               placeholder="Dose"
               value={doseValue}
               onChange={(e) => setDoseValue(e.target.value)}
-              className="w-full rounded-control border border-brand-navy/20 px-3 py-2.5"
+              className="w-full rounded-control border border-ink-rule bg-ink-raised px-3.5 py-2.5 text-sm text-fg transition-colors placeholder:text-fg/35 hover:border-brand-navy/25 focus:border-brand-teal"
             />
             <select
               value={doseUnit}
               onChange={(e) => setDoseUnit(e.target.value as typeof doseUnit)}
-              className="w-full rounded-control border border-brand-navy/20 px-3 py-2.5"
+              className="w-full rounded-control border border-ink-rule bg-ink-raised px-3.5 py-2.5 text-sm text-fg transition-colors placeholder:text-fg/35 hover:border-brand-navy/25 focus:border-brand-teal"
             >
               <option value="mg">mg</option>
               <option value="units">units</option>
@@ -90,7 +91,7 @@ export default function MedicationsPage() {
           <select
             value={frequency}
             onChange={(e) => setFrequency(e.target.value as MedicationFrequency)}
-            className="w-full rounded-control border border-brand-navy/20 px-3 py-2.5"
+            className="w-full rounded-control border border-ink-rule bg-ink-raised px-3.5 py-2.5 text-sm text-fg transition-colors placeholder:text-fg/35 hover:border-brand-navy/25 focus:border-brand-teal"
           >
             {Object.entries(FREQUENCY_LABELS).map(([key, label]) => (
               <option key={key} value={key}>
@@ -105,23 +106,23 @@ export default function MedicationsPage() {
       </Card>
 
       <div className="mt-8 space-y-2">
-        <h2 className="mb-3 text-[13px] font-semibold uppercase tracking-[0.08em] text-brand-navy/40">
+        <h2 className="eyebrow mb-3 text-fg/45">
           Current Medications
         </h2>
         {isLoading ? (
-          <p className="text-sm text-brand-navy/60">Loading…</p>
+          <p className="text-sm text-fg/60">Loading…</p>
         ) : (
           (medications ?? []).map((med) => (
             <div
               key={med.id}
-              className="flex items-center justify-between rounded-lg bg-white p-3 shadow-[0_2px_12px_rgba(15,35,64,0.08)]"
+              className="flex items-center justify-between rounded-card border border-ink-rule bg-ink-raised p-3.5"
             >
               <div>
-                <p className="font-medium text-brand-navy">
+                <p className="font-medium text-fg">
                   {med.name} — {med.dose_value}
                   {med.dose_unit}
                 </p>
-                <p className="text-xs text-brand-navy/50">{FREQUENCY_LABELS[med.frequency as MedicationFrequency]}</p>
+                <p className="text-xs text-fg/50">{FREQUENCY_LABELS[med.frequency as MedicationFrequency]}</p>
               </div>
               <Button
                 variant="ghost"
@@ -140,7 +141,7 @@ export default function MedicationsPage() {
           ))
         )}
         {medications?.length === 0 && (
-          <p className="text-sm text-brand-navy/60">No medications added yet.</p>
+          <p className="text-sm text-fg/60">No medications added yet.</p>
         )}
       </div>
     </div>

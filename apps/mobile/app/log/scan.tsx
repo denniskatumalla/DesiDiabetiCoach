@@ -4,7 +4,7 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { decode as decodeBase64 } from 'base64-arraybuffer';
 import { router } from 'expo-router';
-import type { ScannedFoodItem, MealType } from '@desidiabeticoach/shared';
+import { scannedItemToMealItem, type ScannedFoodItem, type MealType } from '@desidiabeticoach/shared';
 import { trpc } from '@/lib/trpc';
 import { supabase } from '@/lib/supabase';
 import { COLORS } from '@/lib/theme';
@@ -61,23 +61,17 @@ export default function ScanMealScreen() {
       .from('meal-photos')
       .upload(path, decodeBase64(state.base64), { contentType: 'image/jpeg' });
 
-    let photoUrl: string | undefined;
-    if (!uploadError) {
-      const { data } = await supabase.storage.from('meal-photos').createSignedUrl(path, 60 * 60 * 24);
-      photoUrl = data?.signedUrl;
-    }
-
     createMealMutation.mutate({
       mealType,
-      photoUrl,
+      // The object path, not a signed URL — signed URLs expire, and persisting
+      // one left every photo in the history broken a day later. meals.list
+      // signs the path on read.
+      photoPath: uploadError ? undefined : path,
       aiAnalysis: { items: state.items },
-      items: state.items.map((item) => ({
-        foodNameRaw: item.name,
-        quantity: item.estimatedKatori,
-        servingUnit: 'katori',
-        carbsG: item.carbsG,
-        calories: item.calories,
-      })),
+      // scannedItemToMealItem converts Claude's whole-portion figures into the
+      // per-unit values meal_items stores; passing them through raw alongside
+      // `quantity: estimatedKatori` double-counted the carbohydrates.
+      items: state.items.map(scannedItemToMealItem),
     });
   }
 
